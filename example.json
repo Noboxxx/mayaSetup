@@ -1,0 +1,16 @@
+[
+  {
+    "command": "print('Hello World!')",
+    "label": "Hello World!",
+    "overlayLabel": "HW",
+    "annotation": "Hello World!"
+  },
+  null,
+  {
+    "command": "cmds.polySphere()",
+    "label": "Create Sphere",
+    "icon": "polySphere.png",
+    "annotation": "Creating a polySphere",
+    "path": "Create|Objects"
+  }
+]
