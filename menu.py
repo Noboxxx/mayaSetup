@@ -1,7 +1,21 @@
 import json
-from maya import cmds
+from functools import partial
 
-MAYA_MENU_BAR = 'MayaWindow'
+from PySide2.QtGui import QIcon
+from PySide2.QtWidgets import QAction, QMenu
+from maya import cmds, OpenMayaUI
+from shiboken2 import wrapInstance
+
+MAYA_MAIN_WINDOW = 'MayaWindow'
+
+
+def execCommand(command):
+    exec(command)
+
+
+def getMenu(name):
+    pointer = OpenMayaUI.MQtUtil.findControl(name)
+    return wrapInstance(int(pointer), QMenu)
 
 
 def createMenu(name):
@@ -11,7 +25,7 @@ def createMenu(name):
         print('# Deleting \'{}\' menu'.format(name))
         cmds.deleteUI(name, menu=True)
 
-    menu = cmds.menu(name, tearOff=True, parent=MAYA_MENU_BAR)
+    menu = cmds.menu(name, tearOff=True, parent=MAYA_MAIN_WINDOW)
     return menu
 
 
@@ -38,13 +52,23 @@ def fillUpMenu(menu, data):
             else:
                 fullPath = menu
 
-            cmds.menuItem(
-                label,
-                command=item.get('command', ''),
-                image=item.get('icon', ''),
-                annotation=item.get('annotation', ''),
-                parent=fullPath,
-            )
+            parentMenu = getMenu(fullPath)
+
+            action = QAction(label, parentMenu)
+
+            command = item.get('command')
+            if command:
+                action.triggered.connect(partial(execCommand, command))
+
+            icon = item.get('icon')
+            if icon:
+                action.setIcon(QIcon(icon))
+
+            shortcut = item.get('shortcut')
+            if shortcut:
+                action.setShortcut(shortcut)
+
+            parentMenu.addAction(action)
 
 
 def createMenuFromData(name, data):
